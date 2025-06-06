@@ -1,10 +1,10 @@
 import sys
 sys.path.append('/kaggle/input/required8')
 import torch
-from dataloader import MNIST
-from utils import prepare_data, load_obj
-from DAE_model import DenoisingAutoEncoder
-from model import CNNClassifier
+from src.dataloader import MNIST
+from src.utils import prepare_data, load_obj
+from src.model.DAE_model import DenoisingAutoEncoder
+from model.model import CNNClassifier
 
 # ---- Load models ----
 detector_I = AEDetector(DenoisingAutoEncoder, "/kaggle/input/required8/MNIST_I.pth", p=2, model_kwargs={'image_shape': (1, 28, 28), 'structure': [3,"average",3], 'v_noise': 0.1, 'activation': 'relu', 'model_dir': './defensive_models/', 'reg_strength': 0.0})

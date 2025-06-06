@@ -6,8 +6,8 @@ import torch.optim as optim
 import torch.nn.functional as F
 import os
 from torch.utils.data import DataLoader, TensorDataset, random_split
-from dataloader import MNIST  
-from model import CNNClassifier  
+from src.dataloader import MNIST  
+from model.model import CNNClassifier  
 
 def train(data, file_name, params, num_epochs=50, batch_size=128, device=None):
     if device is None:

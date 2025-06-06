@@ -11,8 +11,8 @@ import torch.nn.functional as F
 import numpy as np
 import pylab
 import os
-from utils import prepare_data
-import utils
+from src.utils import prepare_data
+import src.utils as utils
 import matplotlib.pyplot as plt
 
 class AEDetector:

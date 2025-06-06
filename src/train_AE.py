@@ -1,7 +1,7 @@
 import sys
 sys.path.append('/kaggle/input/required5')
-from dataloader import MNIST
-from DAE_model import DenoisingAutoEncoder as DAE
+from src.dataloader import MNIST
+from src.model.DAE_model import DenoisingAutoEncoder as DAE
 import torch
 import torch.nn as nn
 import torch.optim as optim
