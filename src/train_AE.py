@@ -1,11 +1,11 @@
 import sys
-sys.path.append('/kaggle/input/required5')
-from src.dataloader import MNIST
-from src.model.DAE_model import DenoisingAutoEncoder as DAE
+from dataloader import MNIST
+from model.DAE_model import DenoisingAutoEncoder as DAE
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import os
+import wandb
 
 # Configuration
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -48,6 +48,28 @@ def train_autoencoder(model, train_loader, val_loader, archive_name):
             running_loss += loss.item()
 
         avg_loss = running_loss / len(train_loader)
+
+        #  Validation loss 
+        model.eval()
+        val_loss = 0.0
+        with torch.no_grad():
+            for imgs, _ in val_loader:
+                noisy_imgs = imgs + 0.1 * torch.randn_like(imgs)
+                noisy_imgs = torch.clamp(noisy_imgs, -1.0, 1.0)
+                noisy_imgs, imgs = noisy_imgs.to(device), imgs.to(device)
+
+                outputs = model(noisy_imgs)
+                loss = criterion(outputs, imgs)
+                val_loss += loss.item()
+        avg_val_loss = val_loss / len(val_loader)
+
+        # Logging 
+        print(f"Epoch [{epoch + 1}/{epochs}] - Loss: {avg_loss:.4f}, Val Loss: {avg_val_loss:.4f}")
+        wandb.log({
+            "epoch": epoch + 1,
+            "loss/train": avg_loss,
+            "loss/val": avg_val_loss
+        })
         print(f"Epoch [{epoch + 1}/{epochs}] - Loss: {avg_loss:.4f}")
 
     # Save model
@@ -55,10 +77,11 @@ def train_autoencoder(model, train_loader, val_loader, archive_name):
     torch.save(model.state_dict(), f"./defensive_models/{archive_name}.pth")
     print(f"Model saved as ./defensive_models/{archive_name}.pth")
 
-# Train Model I
-AE_I = DAE(shape, combination_I, v_noise=0.1, activation=activation, reg_strength=reg_strength)
-train_autoencoder(AE_I, data.train_loader, data.validation_loader, "MNIST_I")
+if __name__ == "__main__":
+    # Train Model I
+    AE_I = DAE(shape, combination_I, v_noise=0.1, activation=activation, reg_strength=reg_strength)
+    train_autoencoder(AE_I, data.train_loader, data.validation_loader, "MNIST_I")
 
-# Train Model II
-AE_II = DAE(shape, combination_II, v_noise=0.1, activation=activation, reg_strength=reg_strength)
-train_autoencoder(AE_II, data.train_loader, data.validation_loader, "MNIST_II")
+    # Train Model II
+    AE_II = DAE(shape, combination_II, v_noise=0.1, activation=activation, reg_strength=reg_strength)
+    train_autoencoder(AE_II, data.train_loader, data.validation_loader, "MNIST_II")

@@ -1,12 +1,12 @@
 import sys
-sys.path.append('/kaggle/input/required4')
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 import os
+import wandb
 from torch.utils.data import DataLoader, TensorDataset, random_split
-from src.dataloader import MNIST  
+from dataloader import MNIST  
 from model.model import CNNClassifier  
 
 def train(data, file_name, params, num_epochs=50, batch_size=128, device=None):
@@ -44,9 +44,21 @@ def train(data, file_name, params, num_epochs=50, batch_size=128, device=None):
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
-        val_acc = evaluate(model, val_loader, device)
-        print(f"Epoch {epoch+1}/{num_epochs}, Loss: {running_loss/len(train_loader):.4f}, "
-              f"Train Acc: {correct/total:.4f}, Val Acc: {val_acc:.4f}")
+        val_acc, val_loss = evaluate(model, val_loader, device)
+        train_acc = correct/total
+        train_loss = running_loss/len(train_loader)
+        
+        print(f"Epoch {epoch+1}/{num_epochs}, Loss: {train_loss:.4f}, "
+              f"Train Acc: {train_acc:.4f}, Val Acc: {val_acc:.4f}")
+
+        # log to wandb
+        wandb.log({
+        "epoch": epoch + 1,
+        "loss/train": train_loss,
+        "acc/train": train_acc,
+        "loss/val": val_loss,
+        "acc/val": val_acc
+        })
 
    
     if file_name is not None:
@@ -58,17 +70,25 @@ def evaluate(model, dataloader, device):
     model.eval()
     correct = 0
     total = 0
+    val_loss = 0
+    criterion = nn.CrossEntropyLoss()
     with torch.no_grad():
         for inputs, labels in dataloader:
             inputs, labels = inputs.to(device), labels.to(device)
             outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            val_loss += loss.item()
+
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
-    return correct / total
+    avg_val_loss = val_loss/len(dataloader)
+    accuracy = correct/total
+    return accuracy, avg_val_loss
 
 if not os.path.isdir('models'):
     os.makedirs('models')
 
-# Call training function
-train(MNIST(), "models/example_classifier.pth", [32, 32, 64, 64, 200, 200], num_epochs=50)
+if __name__== "__main__":
+    # Call training function
+    train(MNIST(), "models/example_classifier.pth", [32, 32, 64, 64, 200, 200], num_epochs=50)

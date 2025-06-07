@@ -11,8 +11,8 @@ import torch.nn.functional as F
 import numpy as np
 import pylab
 import os
-from src.utils import prepare_data
-import src.utils as utils
+from utils import prepare_data
+import utils as utils
 import matplotlib.pyplot as plt
 
 class AEDetector:
@@ -198,7 +198,7 @@ class Classifier:
 
         X: Torch tensor [N, C, H, W]
         option: "logit" to return raw logits, "prob" to return softmax probs.
-        T: Temperature (used only with option="prob")
+        T: Temperature (used only with option="prob") 
         Returns: NumPy array
         """
         if X.ndim == 4 and X.shape[1:] == torch.Size([28, 28, 1]):
