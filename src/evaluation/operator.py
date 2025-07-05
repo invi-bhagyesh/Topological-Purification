@@ -1,7 +1,6 @@
 # operator.py
 
 
-
 class OperatorBraTS:
     def __init__(self, data_wrapper, classifier, det_dict, reformer):
         """
