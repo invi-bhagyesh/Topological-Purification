@@ -6,7 +6,6 @@ This directory contains the main training and testing scripts for the Topologica
 
 - `train.py` - Training script for DAE models
 - `test.py` - Testing and evaluation script with adversarial attacks
-- `run_examples.py` - Example usage demonstrations
 - `utils.py` - Utility functions and data wrappers
 
 ## Quick Start
@@ -231,16 +230,6 @@ To see all available options for each script:
 python train.py --help
 python test.py --help
 ```
-
-## Running Examples
-
-To see all example commands:
-
-```bash
-python run_examples.py
-```
-
-This will display various example commands without actually executing them.
 
 ## Notes
 
