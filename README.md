@@ -5,7 +5,7 @@ To run this project in a Kaggle Notebook:
 
 ```bash
 # Clone the repository
-!git clone https://github.com/yourusername/topo.git
+!git clone https://github.com/invi-bhagyesh/Topological-Purification.git
 %cd topo
 
 # Verify files
