@@ -1,46 +1,40 @@
+
 # CLI Usage Documentation
 
-This project provides command-line tools for training and evaluating Denoising Autoencoder (DAE) models on medical imaging datasets.
+## 🚀 Quickstart on Kaggle
 
-## Files
-
-- `train.py` — Train DAE models for BraTS and MedMNIST data.
-- `test.py` — Evaluate trained models and run adversarial attacks on BraTS data.
-
----
-
-## Quick Start
-
-### Training
+To run this project in a Kaggle Notebook:
 
 ```bash
-# Basic training with default settings
-python train.py
+# Clone the repository
+!git clone https://github.com/yourusername/topo.git
+%cd topo
 
-# Train with custom parameters
-python train.py --epochs 20 --batch_size 8 --learning_rate 0.0005
+# Verify files
+!ls
 
-# Train only Model I
-python train.py --model_type I --epochs 15
-
-# Train with a custom data path
-python train.py --data_root /path/to/brats/data --output_dir ./my_models/
-```
-
-### Testing
-
-```bash
-# Basic testing with default settings
-python test.py
-
-# Test with custom attack parameters
-python test.py --attack_type pgd --epsilons 0.01,0.02,0.03
-
-# Test with custom model paths
-python test.py --detector_I_path ./my_models/BraTS_DAE2D_I_final.pth
-
-# Test with different data split
-python test.py --test_size 0.2 --val_size 0.3
+# Start training
+!python train.py \
+  --dataset chestmnist \
+  --medmnist_root ./medmnist_data \
+  --data_root ./brats_data \
+  --batch_size 128 \
+  --num_workers 2 \
+  --epochs 30 \
+  --learning_rate 0.001 \
+  --reg_strength 1e-5 \
+  --activation relu \
+  --v_noise 0.1 \
+  --model_type II \
+  --structure_I 32,max,64,max,128,linear_bottleneck \
+  --structure_II 64,max,128,max,256 \
+  --task_type multiclass \
+  --loss_type simclr \
+  --projection_dim 256 \
+  --temperature 0.1 \
+  --num_classes 8 \
+  --input_shape 3,28,28 \
+  --output_dir ./trained_models
 ```
 
 ---
