@@ -13,7 +13,7 @@ To run this project in a Kaggle Notebook:
 
 # Start training
 !python train.py \
-  --dataset bloodmnist \
+  --dataset pathmnist \
   --medmnist_root ./medmnist_data \
   --data_root ./brats_data \
   --batch_size 128 \
@@ -30,7 +30,7 @@ To run this project in a Kaggle Notebook:
   --loss_type simclr \
   --projection_dim 256 \
   --temperature 0.1 \
-  --num_classes 8 \
+  --num_classes 9 \
   --input_shape 3,28,28 \
   --output_dir ./trained_models
 ```
