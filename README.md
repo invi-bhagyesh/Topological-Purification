@@ -1,8 +1,6 @@
 
 # CLI Usage Documentation
 
-## 🚀 Quickstart on Kaggle
-
 To run this project in a Kaggle Notebook:
 
 ```bash
@@ -15,7 +13,7 @@ To run this project in a Kaggle Notebook:
 
 # Start training
 !python train.py \
-  --dataset chestmnist \
+  --dataset bloodmnist \
   --medmnist_root ./medmnist_data \
   --data_root ./brats_data \
   --batch_size 128 \
