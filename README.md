@@ -11,30 +11,6 @@ To run this project in a Kaggle Notebook:
 # Verify files
 !ls
 
-# Start training
-!python train.py \
-  --dataset pathmnist \
-  --medmnist_root ./medmnist_data \
-  --data_root ./brats_data \
-  --batch_size 128 \
-  --num_workers 2 \
-  --epochs 30 \
-  --learning_rate 0.001 \
-  --reg_strength 1e-5 \
-  --activation relu \
-  --v_noise 0.1 \
-  --model_type II \
-  --structure_I 32,max,64,max,128,linear_bottleneck \
-  --structure_II 64,max,128,max,256 \
-  --task_type multiclass \
-  --loss_type simclr \
-  --projection_dim 256 \
-  --temperature 0.1 \
-  --num_classes 9 \
-  --input_shape 3,28,28 \
-  --output_dir ./trained_models
-```
-
 ---
 
 ## Command Line Arguments
