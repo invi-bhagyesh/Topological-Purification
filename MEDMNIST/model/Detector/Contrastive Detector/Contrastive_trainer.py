@@ -5,6 +5,8 @@ import torch.nn.functional as F
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from sklearn.metrics import precision_score, recall_score, f1_score
 import numpy as np
+from ContrastiveEncoder import ContrastiveEncoder
+from Perturbation_classifier import ContrastiveClassifier
 
 class ContrastiveTrainer:
     def __init__(self, device, batch_size=32, temperature=0.1, n_views=2):
