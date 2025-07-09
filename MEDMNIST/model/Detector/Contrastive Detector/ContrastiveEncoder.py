@@ -3,10 +3,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class ContrastiveEncoder(nn.Module):
-    def __init__(self, projection_dim=128):
+    def __init__(self, input_channels=3, projection_dim=128):
         super().__init__()
         self.encoder = nn.Sequential(
-            nn.Conv2d(3, 32, 3, stride=2, padding=1),
+            nn.Conv2d(input_channels, 32, 3, stride=2, padding=1),
             nn.BatchNorm2d(32),
             nn.LeakyReLU(0.2, inplace=True),
             nn.Conv2d(32, 64, 3, stride=2, padding=1),
