@@ -7,6 +7,7 @@ from sklearn.metrics import precision_score, recall_score, f1_score
 import numpy as np
 from ContrastiveEncoder import ContrastiveEncoder
 from Perturbation_classifier import ContrastiveClassifier
+import albumentations as A
 
 class ContrastiveTrainer:
     def __init__(self, device, batch_size=32, temperature=0.1, n_views=2):
@@ -62,9 +63,29 @@ def train_contrastive_encoder(train_loader, val_loader, device, epochs=30, lr=1e
         for batch_idx, (images, _) in enumerate(train_loader):
             images = images.to(device)
             
-            # Create two views of the same images (you can add augmentations here)
-            view1 = images
-            view2 = images  # In practice, you'd apply different augmentations
+            # Define albumentations augmentation pipeline
+            augmentation = A.Compose([
+                A.RandomRotate90(),
+                A.Flip(),
+                A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.05, rotate_limit=15, p=0.5),
+                A.ElasticTransform(p=0.2),
+            ])
+
+            def apply_augmentation(images, augmentation):
+                # images: torch.Tensor of shape (B, C, H, W)
+                images_np = images.permute(0, 2, 3, 1).cpu().numpy()  # (B, H, W, C)
+                augmented = []
+                for img in images_np:
+                    aug = augmentation(image=img)
+                    aug_img = aug['image']
+                    augmented.append(aug_img)
+                augmented = np.stack(augmented)
+                augmented = torch.from_numpy(augmented).permute(0, 3, 1, 2)  # (B, C, H, W)
+                return augmented.type_as(images)
+
+            # Create two augmented views of the same images
+            view1 = apply_augmentation(images, augmentation)
+            view2 = apply_augmentation(images, augmentation)
             
             # Concatenate views
             combined_images = torch.cat([view1, view2], dim=0)
