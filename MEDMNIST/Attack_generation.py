@@ -5,9 +5,9 @@ from torch.utils.data import DataLoader, TensorDataset
 import torchattacks  
 
 class SimpleCNN(nn.Module):
-    def __init__(self, num_classes=9):
+    def __init__(self, input_channels=3, num_classes=9):
         super(SimpleCNN, self).__init__()
-        self.conv1 = nn.Conv2d(3, 16, 3, padding=1)
+        self.conv1 = nn.Conv2d(input_channels, 16, 3, padding=1)
         self.conv2 = nn.Conv2d(16, 32, 3, padding=1)
         self.pool = nn.MaxPool2d(2, 2)
         self.fc1 = nn.Linear(32 * 7 * 7, 128)

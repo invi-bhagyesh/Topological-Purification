@@ -1,8 +1,12 @@
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
 class SimpleAutoencoder(nn.Module):
-    def __init__(self):
+    def __init__(self, input_channels=3):
         super().__init__()
         self.encoder = nn.Sequential(
-            nn.Conv2d(3, 32, 3, stride=2, padding=1),
+            nn.Conv2d(input_channels, 32, 3, stride=2, padding=1),
             nn.BatchNorm2d(32),
             nn.LeakyReLU(0.2, inplace=True),
             nn.Conv2d(32, 64, 3, stride=2, padding=1),
@@ -25,7 +29,7 @@ class SimpleAutoencoder(nn.Module):
             nn.ConvTranspose2d(64, 32, 4, stride=2, padding=1, output_padding=0), # 8x8 → 14x14
             nn.BatchNorm2d(32),
             nn.LeakyReLU(0.2, inplace=True),
-            nn.ConvTranspose2d(32, 3, 4, stride=2, padding=1, output_padding=0), # 14x14 → 28x28
+            nn.ConvTranspose2d(32, input_channels, 4, stride=2, padding=1, output_padding=0), # 14x14 → 28x28
             nn.Sigmoid()
         )
     

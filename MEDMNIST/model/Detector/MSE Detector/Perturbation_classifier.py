@@ -1,8 +1,11 @@
+import torch
+import torch.nn as nn
+
 class PerturbationClassifier(nn.Module):
-    def __init__(self):
+    def __init__(self, input_channels=3):
         super().__init__()
         self.features = nn.Sequential(
-            nn.Conv2d(3, 32, 3, stride=1, padding=1),
+            nn.Conv2d(input_channels, 32, 3, stride=1, padding=1),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2, 2),
             nn.Conv2d(32, 64, 3, stride=1, padding=1),
