@@ -30,7 +30,7 @@ def train_gan_topo_autoencoder(train_loader, val_loader, device, epochs=30, lr=1
     scheduler = ReduceLROnPlateau(opt_EG, mode='min', factor=0.5, patience=10)
 
     best_val_topo = float('inf')
-    best_model_path = 'best_gan_topo_recon.pth'
+    best_model_path = 'best_gan_topo.pth'
 
     for epoch in range(epochs):
         encoder.train()
