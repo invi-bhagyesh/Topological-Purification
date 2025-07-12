@@ -46,10 +46,12 @@ def train_gan_topo_autoencoder(train_loader, val_loader, device, epochs=30, lr=1
             fake_labels = torch.zeros(batch_size, 1).to(device)
 
             # --- Train Discriminator ---
-            z = encoder(images)
-            x_hat = generator(z).detach()
+            with torch.no_grad():
+                z = encoder(images)
+                x_hat = generator(z)
+
             D_real = discriminator(images)
-            D_fake = discriminator(x_hat)
+            D_fake = discriminator(x_hat.detach())
 
             d_loss = adv_loss_fn(D_real, real_labels) + adv_loss_fn(D_fake, fake_labels)
             opt_D.zero_grad()
@@ -63,18 +65,19 @@ def train_gan_topo_autoencoder(train_loader, val_loader, device, epochs=30, lr=1
 
             adv_loss = adv_loss_fn(D_fake, real_labels)
 
+            # --- Topological loss ---
             if epoch >= topo_start_epoch:
-                with torch.no_grad():
-                    x_dist = torch.cdist(images.view(batch_size, -1), images.view(batch_size, -1), p=2)
-                    z_dist = torch.cdist(z, z, p=2)
-                    x_dist = x_dist / x_dist.max()
-                    z_dist = z_dist / z_dist.max()
+                x_dist = torch.cdist(images.view(batch_size, -1), images.view(batch_size, -1), p=2).detach()  # No grad needed from input
+                z_dist = torch.cdist(z, z, p=2)
+
+                x_dist = x_dist / x_dist.max()
+                z_dist = z_dist / z_dist.max()
 
                 topo_loss, _ = topo_loss_fn(x_dist, z_dist)
                 topo_loss_scaled = 0.01 * topo_loss
                 total_EG_loss = 1e-3 * adv_loss + lambda_topo * topo_loss_scaled
             else:
-                topo_loss_scaled = torch.tensor(0.0).to(device)
+                topo_loss_scaled = torch.tensor(0.0, device=device)
                 total_EG_loss = 1e-3 * adv_loss
 
             opt_EG.zero_grad()
@@ -109,9 +112,9 @@ def train_gan_topo_autoencoder(train_loader, val_loader, device, epochs=30, lr=1
                 z_dist = torch.cdist(z, z, p=2)
                 x_dist = x_dist / x_dist.max()
                 z_dist = z_dist / z_dist.max()
+
                 topo_loss_val, _ = topo_loss_fn(x_dist, z_dist)
-                topo_loss_val_scaled = 0.01 * topo_loss_val
-                val_topo_loss += topo_loss_val_scaled.item()
+                val_topo_loss += (0.01 * topo_loss_val).item()
 
         val_topo_loss /= len(val_loader)
         print(f"Epoch [{epoch+1}/{epochs}], Train Loss: {total_loss/len(train_loader):.4f}, Val Topo Loss: {val_topo_loss:.4f}")
