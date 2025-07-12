@@ -53,14 +53,14 @@ def main():
     if args.train_autoencoder:
         train_loader, val_loader, info = get_autoencoder_data_loaders(args.batch_size, args.data_flag)
         # Pass input channels to model if needed
-        autoencoder = SimpleAutoencoder(input_channels=info['channel']).to(device)
+        autoencoder = SimpleAutoencoder(input_channels=info['n_channels']).to(device)
         train_autoencoder(
             train_loader, val_loader, device,
             epochs=args.epochs_autoencoder, lr=args.lr_autoencoder, loss_type=args.loss_type
         )
     else:
         train_loader, val_loader, info = get_autoencoder_data_loaders(args.batch_size, args.data_flag)
-        autoencoder = SimpleAutoencoder(input_channels=info['channel']).to(device)
+        autoencoder = SimpleAutoencoder(input_channels=info['n_channels']).to(device)
         autoencoder.load_state_dict(torch.load('mse_autoencoder.pth', map_location=device))
         autoencoder.eval()
 

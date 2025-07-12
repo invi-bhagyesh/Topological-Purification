@@ -59,14 +59,14 @@ def main():
     info = None
     if args.train_encoder:
         train_loader, val_loader, info = get_encoder_data_loaders(args.batch_size, args.data_flag)
-        encoder = ContrastiveEncoder(input_channels=info['channel']).to(device)
+        encoder = ContrastiveEncoder(input_channels=info['n_channels']).to(device)
         train_contrastive_encoder(
             train_loader, val_loader, device,
             epochs=args.epochs_encoder, lr=args.lr_encoder
         )
     else:
         train_loader, val_loader, info = get_encoder_data_loaders(args.batch_size, args.data_flag)
-        encoder = ContrastiveEncoder(input_channels=info['channel']).to(device)
+        encoder = ContrastiveEncoder(input_channels=info['n_channels']).to(device)
         encoder.load_state_dict(torch.load('contrastive_encoder.pth', map_location=device))
         encoder.eval()
 
