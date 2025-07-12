@@ -26,7 +26,7 @@ def train_gan_topo_autoencoder(train_loader, val_loader, device, epochs=30, lr=1
     topo_loss_fn = TopologicalSignatureDistance().to(device)
 
     opt_EG = optim.Adam(list(encoder.parameters()) + list(generator.parameters()), lr=lr)
-    opt_D = optim.Adam(discriminator.parameters(), lr=lr)
+    opt_D = optim.Adam(discriminator.parameters(), lr=1e-5)
     scheduler = ReduceLROnPlateau(opt_EG, mode='min', factor=0.5, patience=10)
 
     best_val_topo = float('inf')
