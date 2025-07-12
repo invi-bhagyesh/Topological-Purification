@@ -66,7 +66,8 @@ def train_contrastive_encoder(train_loader, val_loader, device, epochs=30, lr=1e
             # Define albumentations augmentation pipeline
             augmentation = A.Compose([
                 A.RandomRotate90(),
-                A.Flip(),
+                A.HorizontalFlip(p=0.5),
+                A.VerticalFlip(p=0.5),
                 A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.05, rotate_limit=15, p=0.5),
                 A.ElasticTransform(p=0.2),
             ])
