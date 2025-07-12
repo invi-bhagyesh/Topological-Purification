@@ -22,7 +22,10 @@ class ContrastiveTrainer:
         Args:
             features: [n_views * batch_size, embedding_dim]
         """
-        labels = torch.cat([torch.arange(self.batch_size) for i in range(self.n_views)], dim=0)
+        # Calculate actual batch size from features tensor
+        actual_batch_size = features.shape[0] // self.n_views
+        
+        labels = torch.cat([torch.arange(actual_batch_size) for i in range(self.n_views)], dim=0)
         labels = (labels.unsqueeze(0) == labels.unsqueeze(1)).float()
         labels = labels.to(self.device)
 
