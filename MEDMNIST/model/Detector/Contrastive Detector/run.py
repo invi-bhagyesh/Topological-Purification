@@ -3,6 +3,15 @@ import torch
 from ContrastiveEncoder import ContrastiveEncoder
 from Perturbation_classifier import ContrastiveClassifier
 from Contrastive_trainer import train_contrastive_encoder, train_contrastive_classifier
+import sys, os
+# Go up 3 levels to reach the root (where set_root_path.py is)
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.."))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
+
+from set_root_path import add_project_root
+add_project_root()  # This adds topo/ to sys.path
+
 from MEDMNIST.dataloader import load_medmnist
 from MEDMNIST.Attack_generation import SimpleCNN, train_model, generate_mixed_dataset
 
