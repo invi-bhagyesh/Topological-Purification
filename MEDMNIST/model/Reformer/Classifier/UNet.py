@@ -51,19 +51,27 @@ class UNet(nn.Module):
         p2 = self.pool2(e2)
         e3 = self.enc3(p2)
         p3 = self.pool3(e3)
-
+    
         # Bottleneck
         b = self.bottleneck(p3)
-
+    
         # Decoder
         u3 = self.up3(b)
+        if u3.shape[2:] != e3.shape[2:]:
+            u3 = F.interpolate(u3, size=e3.shape[2:], mode='bilinear', align_corners=False)
         d3 = self.dec3(torch.cat([u3, e3], dim=1))
+    
         u2 = self.up2(d3)
+        if u2.shape[2:] != e2.shape[2:]:
+            u2 = F.interpolate(u2, size=e2.shape[2:], mode='bilinear', align_corners=False)
         d2 = self.dec2(torch.cat([u2, e2], dim=1))
+    
         u1 = self.up1(d2)
-        # For the last skip connection, upsampled feature and input
+        if u1.shape[2:] != x.shape[2:]:
+            u1 = F.interpolate(u1, size=x.shape[2:], mode='bilinear', align_corners=False)
         d1 = self.dec1(torch.cat([u1, x], dim=1))
-
+    
         # Classification head
         logits = self.classifier(d1)
         return logits
+    
