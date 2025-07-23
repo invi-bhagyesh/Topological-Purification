@@ -18,6 +18,7 @@ from MEDMNIST.model.Reformer.Classifier.UNet import UNet
 from MEDMNIST.model.Reformer.GAN_Recon.GAN import Generator as GANReconGenerator
 from MEDMNIST.model.Reformer.GAN_Topo.GAN import Generator as GANTopoGenerator
 from MEDMNIST.model.Reformer.GAN_Topo_Recon.GAN import Generator as GANTopoReconGenerator
+from MEDMNIST.Attack_generation import generate_mixed_dataset
 
 def evaluate(model, dataloader, device, num_classes):
     model.eval()
@@ -90,10 +91,17 @@ def main():
     parser.add_argument('--gan_recon_weights', type=str, default='MEDMNIST/model/Reformer/GAN_Recon/gan_recon.pth', help='Path to GAN_Recon reformer weights file')
     parser.add_argument('--gan_topo_weights', type=str, default='MEDMNIST/model/Reformer/GAN_Topo/gan_topo.pth', help='Path to GAN_Topo reformer weights file')
     parser.add_argument('--gan_topo_recon_weights', type=str, default='MEDMNIST/model/Reformer/GAN_Topo_Recon/gan_topo_recon.pth', help='Path to GAN_Topo_Recon reformer weights file')
+    parser.add_argument('--pure_adv', action='store_true', help='Use only adversarial examples in test set')
     args = parser.parse_args()
 
     device = torch.device(args.device if torch.cuda.is_available() else 'cpu')
-    _, _, test_loader, info = load_medmnist(data_flag=args.data_flag, batch_size=args.batch_size)
+    train_loader, _, test_loader, info = load_medmnist(data_flag=args.data_flag, batch_size=args.batch_size)
+    
+    if args.pure_adv:
+        print("[INFO] Generating adversarial test set...")
+        classifier = UNet(input_channels=info.get('n_channels', 3), num_classes=len(info['label'])).to(device)
+        classifier.load_state_dict(torch.load(args.classifier_weights, map_location=device))
+        test_loader = generate_mixed_dataset(model=classifier, train_loader=test_loader, device=device, pure_adv=True)
     input_channels = info.get('n_channels', 3)
     num_classes = len(info['label'])
 
