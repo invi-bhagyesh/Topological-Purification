@@ -138,7 +138,7 @@ def main():
             raise ValueError(f"Missing weight file for {reformer_type}. Please provide --{reformer_type}_weights")
     
         print(f"[INFO] Loading {reformer_type} weights from: {weights}")
-        reformer = Generator(output_channels=input_channels).to(device)
+        reformer = Generator(latent_dim=512, output_channels=input_channels).to(device)
         checkpoint = torch.load(weights, map_location=device)
         if isinstance(checkpoint, dict) and "generator" in checkpoint:
             reformer.load_state_dict(checkpoint["generator"])
