@@ -139,7 +139,18 @@ def main():
     
         print(f"[INFO] Loading {reformer_type} weights from: {weights}")
         reformer = Generator(latent_dim=512, output_channels=input_channels).to(device)
+        
+        # DEBUG: Check expected decoder input shape
+        print("Expected decoder Linear input dim:", reformer.decoder[0].in_features)
         checkpoint = torch.load(weights, map_location=device)
+
+        # DEBUG: Check actual weight shape from file
+        if isinstance(checkpoint, dict) and "generator" in checkpoint:
+            loaded_weight_shape = checkpoint["generator"]["decoder.0.weight"].shape
+        else:
+            loaded_weight_shape = checkpoint["decoder.0.weight"].shape
+        print("Loaded decoder Linear weight shape:", loaded_weight_shape)
+
         if isinstance(checkpoint, dict) and "generator" in checkpoint:
             reformer.load_state_dict(checkpoint["generator"])
         else:
