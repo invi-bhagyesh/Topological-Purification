@@ -88,9 +88,9 @@ def main():
     parser.add_argument('--data_flag', type=str, default='pathmnist', help='MedMNIST dataset flag (e.g., pathmnist, bloodmnist, etc.)')
     parser.add_argument('--test_reformer', type=str, default='all', choices=['all', 'gan_recon', 'gan_topo', 'gan_topo_recon', 'none'], help='Which reformer(s) to test')
     parser.add_argument('--classifier_weights', type=str, default='MEDMNIST/model/Reformer/Classifier/unet_classifier.pth', help='Path to classifier weights file')
-    parser.add_argument('--gan_recon_weights', type=str, default='MEDMNIST/model/Reformer/GAN_Recon/gan_recon.pth', help='Path to GAN_Recon reformer weights file')
-    parser.add_argument('--gan_topo_weights', type=str, default='MEDMNIST/model/Reformer/GAN_Topo/gan_topo.pth', help='Path to GAN_Topo reformer weights file')
-    parser.add_argument('--gan_topo_recon_weights', type=str, default='MEDMNIST/model/Reformer/GAN_Topo_Recon/gan_topo_recon.pth', help='Path to GAN_Topo_Recon reformer weights file')
+    parser.add_argument('--gan_recon_weights', type=str, required=False, help='Path to GAN_Recon reformer weights file')
+    parser.add_argument('--gan_topo_weights', type=str, required=False, help='Path to GAN_Topo reformer weights file')
+    parser.add_argument('--gan_topo_recon_weights', type=str, required=False, help='Path to GAN_Topo_Recon reformer weights file')
     parser.add_argument('--pure_adv', action='store_true', help='Use only adversarial examples in test set')
     args = parser.parse_args()
 
@@ -120,7 +120,7 @@ def main():
         reformer_types = ['gan_recon', 'gan_topo', 'gan_topo_recon']
     elif args.test_reformer != 'none':
         reformer_types = [args.test_reformer]
-
+    
     for reformer_type in reformer_types:
         if reformer_type == 'gan_recon':
             Generator = GANReconGenerator
@@ -133,14 +133,18 @@ def main():
             weights = args.gan_topo_recon_weights
         else:
             continue
-        # Load reformer
+    
+        if not weights:
+            raise ValueError(f"Missing weight file for {reformer_type}. Please provide --{reformer_type}_weights")
+    
+        print(f"[INFO] Loading {reformer_type} weights from: {weights}")
         reformer = Generator(output_channels=input_channels).to(device)
         checkpoint = torch.load(weights, map_location=device)
         if isinstance(checkpoint, dict) and "generator" in checkpoint:
             reformer.load_state_dict(checkpoint["generator"])
         else:
             reformer.load_state_dict(checkpoint)
-
+    
         reformer.eval()
         acc, auc, f1, cm = evaluate_with_reformer(reformer, classifier, test_loader, device, num_classes)
         print_metrics(f"Reformer+Classifier: {reformer_type}", acc, auc, f1, cm)
