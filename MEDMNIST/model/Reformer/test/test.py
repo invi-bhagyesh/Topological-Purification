@@ -136,7 +136,11 @@ def main():
         # Load reformer
         reformer = Generator(output_channels=input_channels).to(device)
         checkpoint = torch.load(weights, map_location=device)
-        reformer.load_state_dict(checkpoint['generator'])
+        if isinstance(checkpoint, dict) and "generator" in checkpoint:
+            reformer.load_state_dict(checkpoint["generator"])
+        else:
+            reformer.load_state_dict(checkpoint)
+
         reformer.eval()
         acc, auc, f1, cm = evaluate_with_reformer(reformer, classifier, test_loader, device, num_classes)
         print_metrics(f"Reformer+Classifier: {reformer_type}", acc, auc, f1, cm)
