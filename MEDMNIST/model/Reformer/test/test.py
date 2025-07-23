@@ -144,3 +144,5 @@ def main():
 if __name__ == '__main__':
     main()
 # python test.py --batch_size 32 --device cuda --data_flag pathmnist --test_reformer all
+#python test.py --data_flag pathmnist --test_reformer none --pure_adv
+
