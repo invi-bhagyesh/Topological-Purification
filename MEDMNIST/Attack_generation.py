@@ -45,7 +45,7 @@ def train_model(model, train_loader, device='cuda', epochs=5, lr=0.001):
         print(f"Epoch {epoch+1}/{epochs}, Loss: {running_loss/len(train_loader):.4f}")
 
 
-def generate_mixed_dataset(model, train_loader, epsilon=0.1, alpha=0.01, pgd_iters=7, device='cuda'):
+def generate_mixed_dataset(model, train_loader, epsilon=0.1, alpha=0.01, pgd_iters=7, device='cuda', pure_adv=False):
     clean_images, clean_labels = [], []
     adv_images, adv_labels = [], []
 
@@ -69,17 +69,21 @@ def generate_mixed_dataset(model, train_loader, epsilon=0.1, alpha=0.01, pgd_ite
         pgd_labels = labels[half:].squeeze()
         pgd_output = pgd(pgd_input, pgd_labels)
 
-        # Collect clean and adversarial
-        clean_images.append(images)
-        clean_labels.append(torch.zeros(batch_size, dtype=torch.long, device=device))  # Label 0
-
         combined_adv = torch.cat([fgsm_output, pgd_output], dim=0)
         adv_images.append(combined_adv)
-        adv_labels.append(torch.ones(batch_size, dtype=torch.long, device=device))  # Label 1
+        adv_labels.append(labels)
+
+        if not pure_adv:
+            clean_images.append(images)
+            clean_labels.append(labels)
 
     # Stack and return
-    all_images = torch.cat(clean_images + adv_images, dim=0)
-    all_labels = torch.cat(clean_labels + adv_labels, dim=0)
+    if pure_adv:
+        all_images = torch.cat(adv_images, dim=0)
+        all_labels = torch.cat(adv_labels, dim=0)
+    else:
+        all_images = torch.cat(clean_images + adv_images, dim=0)
+        all_labels = torch.cat(clean_labels + adv_labels, dim=0)
 
     combined_dataset = TensorDataset(all_images, all_labels)
     combined_loader = DataLoader(combined_dataset, batch_size=64, shuffle=True)
