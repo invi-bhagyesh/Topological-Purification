@@ -31,11 +31,12 @@ class UNet(nn.Module):
         self.bottleneck = UNetBlock(features[2], features[2])
 
         self.up3 = nn.ConvTranspose2d(features[2], features[1], kernel_size=2, stride=2)
-        self.dec3 = UNetBlock(features[2], features[1])
+        self.dec3 = UNetBlock(features[1] + features[2], features[1])  # 🔧 fixed
         self.up2 = nn.ConvTranspose2d(features[1], features[0], kernel_size=2, stride=2)
         self.dec2 = UNetBlock(features[1] + features[0], features[0])
         self.up1 = nn.ConvTranspose2d(features[0], features[0], kernel_size=2, stride=2)
         self.dec1 = UNetBlock(features[0] + input_channels, features[0])
+
 
         self.classifier = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
