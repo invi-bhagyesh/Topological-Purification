@@ -134,6 +134,9 @@ def train_contrastive_encoder(train_loader, val_loader, device, epochs=30, lr=1e
     print("Contrastive encoder saved to contrastive_encoder.pth")
     return model
 
+from sklearn.metrics import precision_score, recall_score, f1_score
+from collections import Counter
+
 def train_contrastive_classifier(encoder, train_loader, device, epochs=20, lr=0.001):
     """
     Train the classifier using embeddings from the contrastive encoder
@@ -146,7 +149,7 @@ def train_contrastive_classifier(encoder, train_loader, device, epochs=20, lr=0.
     precision_history = []
     recall_history = []
     accuracy_history = []
-    
+
     for epoch in range(epochs):
         classifier.train()
         running_loss = 0.0
@@ -154,46 +157,59 @@ def train_contrastive_classifier(encoder, train_loader, device, epochs=20, lr=0.
         total = 0
         all_preds = []
         all_labels = []
-        
+
         for images, labels in train_loader:
             images, labels = images.to(device), labels.to(device)
 
-            # Fix: convert one-hot to class indices if needed
+            # Convert one-hot labels to class indices if needed
             if labels.ndim > 1:
                 labels = labels.argmax(dim=1)
-            
+
             # Get embeddings from pre-trained encoder
             with torch.no_grad():
                 embeddings = encoder(images)
-            
+
             # Classify embeddings
             outputs = classifier(embeddings)
             loss = criterion(outputs, labels)
-            
+
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            
+
             running_loss += loss.item()
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
             all_preds.extend(predicted.cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
-        
+
         accuracy = 100 * correct / total
-        precision = precision_score(all_labels, all_preds, average='binary')
-        recall = recall_score(all_labels, all_preds, average='binary')
-        f1 = f1_score(all_labels, all_preds, average='binary')
-        
+
+        # Detect number of unique classes
+        num_classes = len(set(all_labels))
+
+        # Select averaging strategy for metrics
+        avg_type = 'binary' if num_classes == 2 else 'macro'
+
+        precision = precision_score(all_labels, all_preds, average=avg_type, zero_division=0)
+        recall = recall_score(all_labels, all_preds, average=avg_type, zero_division=0)
+        f1 = f1_score(all_labels, all_preds, average=avg_type, zero_division=0)
+
         accuracy_history.append(accuracy)
         precision_history.append(precision)
         recall_history.append(recall)
         f1_history.append(f1)
-        
+
         print(f"Epoch {epoch+1}/{epochs}, Loss: {running_loss/len(train_loader):.4f}, "
               f"Accuracy: {accuracy:.2f}%, Precision: {precision:.4f}, Recall: {recall:.4f}, F1: {f1:.4f}")
-    
+
+        # Debugging tip: print label distribution every few epochs
+        if epoch == 0 or epoch == epochs - 1:
+            print("Label distribution:", Counter(all_labels))
+            print("Prediction distribution:", Counter(all_preds))
+
     torch.save(classifier.state_dict(), "contrastive_classifier.pth")
     print("Contrastive classifier saved to contrastive_classifier.pth")
     return classifier
+
