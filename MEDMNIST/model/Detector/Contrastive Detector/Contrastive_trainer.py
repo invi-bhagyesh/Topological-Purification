@@ -190,7 +190,7 @@ def train_contrastive_classifier(encoder, train_loader, device, epochs=20, lr=0.
         num_classes = len(set(all_labels))
 
         # Select averaging strategy for metrics
-        avg_type = 'binary' if num_classes == 2 else 'macro'
+        avg_type =  'macro'
 
         precision = precision_score(all_labels, all_preds, average=avg_type, zero_division=0)
         recall = recall_score(all_labels, all_preds, average=avg_type, zero_division=0)
