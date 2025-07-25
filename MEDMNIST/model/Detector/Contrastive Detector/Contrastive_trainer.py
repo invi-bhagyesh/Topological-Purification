@@ -157,6 +157,10 @@ def train_contrastive_classifier(encoder, train_loader, device, epochs=20, lr=0.
         
         for images, labels in train_loader:
             images, labels = images.to(device), labels.to(device)
+
+            # Fix: convert one-hot to class indices if needed
+            if labels.ndim > 1:
+                labels = labels.argmax(dim=1)
             
             # Get embeddings from pre-trained encoder
             with torch.no_grad():
@@ -192,4 +196,4 @@ def train_contrastive_classifier(encoder, train_loader, device, epochs=20, lr=0.
     
     torch.save(classifier.state_dict(), "contrastive_classifier.pth")
     print("Contrastive classifier saved to contrastive_classifier.pth")
-    return classifier 
+    return classifier
